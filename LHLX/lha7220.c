@@ -48,10 +48,16 @@ void lha7220_SoftwareReset(void)
 
 /**
   * @brief  Initialize the LHA7220 ADC device.
-  *         Performs a software reset, sends POWERDOWN to ensure known state,
-  *         configures CONFIG0..CONFIG3 with default settings (single-shot,
-  *         AIN0-AIN1, gain=1, internal reference, 20 SPS, IDACs off),
-  *         and leaves the device ready for a START/SYNC command.
+  *         Performs a software reset, then writes a default configuration to
+  *         CONFIG0..CONFIG3: continuous conversion mode (CM=1), AIN0-AIN1
+  *         differential input, PGA gain=1, internal 2.048V reference,
+  *         20 SPS normal mode, IDACs off, DRDYM=0 (data-ready indicated on
+  *         the dedicated DRDY pin only).
+  *         This function does NOT start conversions and does NOT enter
+  *         power-down mode. After init, send CMD_START_SYNC to begin
+  *         continuous conversions, or rewrite the registers for single-shot
+  *         operation. (No example currently calls this function; each
+  *         example performs its own reset + configuration.)
   * @param  None
   * @retval None
   */
@@ -62,13 +68,14 @@ void lha7220_Init(void)
 
     /* Configure default registers */
     uint8_t configData[4];
-		uint8_t regData[4];
 
-    /* CONFIG0: AIN0-AIN1 differential, gain=1, PGA bypass (has no effect) */
+    /* CONFIG0: AIN0-AIN1 differential, gain=1 (PGA_BYPASS bit exists for
+       ADS1220 compatibility only and has no effect on LHA7220) */
     configData[0] = CONFIG0_MUX_AIN0_AIN1 | CONFIG0_GAIN_1;
 
-    /* CONFIG1: Normal mode, continuous conversion, 20 SPS, temp sensor off, BCS off */
-    configData[1] = CONFIG1_DR_20SPS | CONFIG1_MODE_NORMAL | CONFIG1_CM; /* CM=1, TS=0, BCS=0 */
+    /* CONFIG1: Normal mode, continuous conversion (CM=1), 20 SPS,
+       temp sensor off, BCS off */
+    configData[1] = CONFIG1_DR_20SPS | CONFIG1_MODE_NORMAL | CONFIG1_CM;
 
     /* CONFIG2: Internal reference, no 50/60 rejection, switch open, IDACs off */
     configData[2] = CONFIG2_VREF_INTERNAL | CONFIG2_50_60_NONE; /* PSW=0, IDAC=000 */
@@ -77,10 +84,6 @@ void lha7220_Init(void)
     configData[3] = CONFIG3_I1MUX_DIS | CONFIG3_I2MUX_DIS; /* DRDYM=0 */
 
     lha7220_WriteRegister(REG_CONFIG0, configData, 4);
-
-    /* (Optional) read back verification could be added here */
-		lha7220_ReadRegister(REG_CONFIG0, regData, 4);
-		
 }
 
 /**
