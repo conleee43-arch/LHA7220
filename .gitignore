@@ -1,0 +1,29 @@
+# Keil MDK-ARM Output Directories
+MDK-ARM/firmware/
+MDK-ARM/Listings/
+MDK-ARM/Objects/
+
+# Keil Project User-Specific & Temp Files
+MDK-ARM/*.uvguix.*
+MDK-ARM/*.uvgui.*
+MDK-ARM/*.bak
+MDK-ARM/*.dep
+MDK-ARM/JLinkLog.txt
+
+# Compilation Intermediate and Binary Files
+*.o
+*.d
+*.crf
+*.axf
+*.htm
+*.lnp
+*.sct
+*.map
+*.lst
+
+# IDE and OS Files
+.vscode/
+.idea/
+Thumbs.db
+Desktop.ini
+*.tmp
